@@ -57,7 +57,7 @@ app.get("/accounts", async(req, res) => {
             res.send(accs)
         }
     } else {
-        res.redirect("/");
+        res.redirect("/login");
     }
 });
 //Retrieve single Account by ID
@@ -75,7 +75,7 @@ app.get("/accounts/:id", async(req, res) => {
             res.send(acc);
         }
     } else {
-        res.redirect("/");
+        res.redirect("/login");
     }
 });
 
@@ -95,7 +95,7 @@ app.get("/balance/:id", async(req, res) => {
 
         }
     } else {
-        res.redirect("/");
+        res.redirect("/login");
     }
 })
 
@@ -116,7 +116,7 @@ app.get("/transactions/:id/:from/:to", async(req, res) => {
 
             }
         } else {
-            res.redirect("/");
+            res.redirect("/login");
         }
     })
     /// DEV test
