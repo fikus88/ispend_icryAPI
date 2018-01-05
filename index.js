@@ -14,7 +14,7 @@ const client = new AuthAPIClient({
 const scopes = ["info", "accounts", "balance", "transactions", "offline_access", "cards"]
 
 // Construct url and redirect to the auth dialog
-app.get("/", (req, res) => {
+app.get("/login", (req, res) => {
     const authURL = client.getAuthUrl(redirect_uri, scopes, "foobar");
     res.redirect(authURL);
 });
