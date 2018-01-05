@@ -38,7 +38,6 @@ async function isTokenValid() {
 app.get("/truelayer-redirect", async(req, res) => {
     const code = req.query.code;
     const tokens = await client.exchangeCodeForToken(redirect_uri, code);
-    const info = await DataAPIClient.getInfo(tokens.access_token);
     _Token = tokens;
 
     res.redirect("/accounts");
@@ -79,6 +78,7 @@ app.get("/accounts/:id", async(req, res) => {
         res.redirect("/");
     }
 });
+
 //retrieve balance for given account id
 app.get("/balance/:id", async(req, res) => {
     if (_Token != null) {
