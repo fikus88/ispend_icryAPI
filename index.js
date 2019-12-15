@@ -48,7 +48,6 @@ async function isTokenValid() {
 app.get("/truelayer-redirect", async(req, res) => {
     const code = req.query.code;
     const tokens = await client.exchangeCodeForToken(redirect_uri, code);
-    const info = await DataAPIClient.getInfo(tokens.access_token);
     _Token = tokens;
 
     if (DEMOMODE) {
@@ -73,7 +72,7 @@ app.get("/accounts", async(req, res) => {
             res.send(accs)
         }
     } else {
-        res.redirect("/");
+        res.redirect("/login");
     }
 });
 //Retrieve single Account by ID
@@ -91,9 +90,10 @@ app.get("/accounts/:id", async(req, res) => {
             res.send(acc);
         }
     } else {
-        res.redirect("/");
+        res.redirect("/login");
     }
 });
+
 //retrieve balance for given account id
 app.get("/balance/:id", async(req, res) => {
     if (_Token != null) {
@@ -124,7 +124,7 @@ app.get("/balance/:id", async(req, res) => {
 
         }
     } else {
-        res.redirect("/");
+        res.redirect("/login");
     }
 })
 
@@ -163,7 +163,7 @@ app.get("/transactions/:id/:from/:to", async(req, res) => {
 
             }
         } else {
-            res.redirect("/");
+            res.redirect("/login");
         }
     })
     /// DEV test
