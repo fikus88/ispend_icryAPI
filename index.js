@@ -10,6 +10,13 @@ const client = new AuthAPIClient({
     client_secret: _sens.Secret
 });
 
+const fs = require('fs');
+
+
+
+/// DEMO MODE ON LIVE ACCOUNTS
+var DEMOMODE = true;
+
 // Define array of permission scopes
 const scopes = ["info", "accounts", "balance", "transactions", "offline_access", "cards"]
 
@@ -23,6 +30,9 @@ app.get("/login", (req, res) => {
 async function refreshToken() {
     const newToken = await client.refreshAccessToken(_Token.refresh_token);
     _Token = newToken;
+    if (DEMOMODE) {
+        fs.writeFileSync('demotoken.txt', _Token.access_token)
+    }
     console.log("Token refreshed");
 }
 // validate if token needs to be refreshed
@@ -41,6 +51,10 @@ app.get("/truelayer-redirect", async(req, res) => {
     const info = await DataAPIClient.getInfo(tokens.access_token);
     _Token = tokens;
 
+    if (DEMOMODE) {
+        fs.writeFileSync('demotoken.txt', _Token.access_token)
+    }
+
     res.redirect("/accounts");
 });
 //Retrieve accounts
@@ -50,6 +64,7 @@ app.get("/accounts", async(req, res) => {
 
         if (await isTokenValid() == true) {
             const accs = await DataAPIClient.getAccounts(_Token.access_token);
+
             res.send(accs)
 
         } else {
@@ -86,11 +101,25 @@ app.get("/balance/:id", async(req, res) => {
         if (await isTokenValid() == true) {
 
             const balance = await DataAPIClient.getBalance(_Token.access_token, account_id);
+
+            if (DEMOMODE) {
+                balance.results[0].current = 0,
+                    balance.results[0].available = 0,
+                    balance.results[0].overdraft = 0
+            }
+
             res.send(balance);
 
         } else {
             await refreshToken();
             const balance = await DataAPIClient.getBalance(_Token.access_token, account_id);
+
+            if (DEMOMODE) {
+                balance.results[0].current = 0,
+                    balance.results[0].available = 0,
+                    balance.results[0].overdraft = 0
+            }
+
             res.send(balance);
 
         }
@@ -107,11 +136,29 @@ app.get("/transactions/:id/:from/:to", async(req, res) => {
 
             if (await isTokenValid() == true) {
                 const transactions = await DataAPIClient.getTransactions(_Token.access_token, account_id, from, to);
+
+                if (DEMOMODE) {
+                    transactions.results.forEach(transaction => {
+
+                        transaction.amount = 0,
+                            transaction.running_balance.amount = 0
+                    });
+                }
+
                 res.send(transactions);
 
             } else {
                 await refreshToken();
                 const transactions = await DataAPIClient.getTransactions(_Token.access_token, account_id, from, to);
+
+                if (DEMOMODE) {
+                    transactions.results.forEach(transaction => {
+
+                        transaction.amount = 0,
+                            transaction.running_balance.amount = 0
+                    });
+                }
+
                 res.send(transactions);
 
             }
@@ -122,7 +169,22 @@ app.get("/transactions/:id/:from/:to", async(req, res) => {
     /// DEV test
 app.get("/replacetoken", async(req, res) => {
     _Token.access_token = "xxxxxxxxxxxxxxxxxxxx";
+    fs.unlinkSync('demotoken.txt');
     res.send("Token replaced");
 })
 
-app.listen(5000, () => console.log("iSpend-iCry RestAPI listening on port 5000"));
+app.get('/changemode', async(req, res) => {
+        DEMOMODE = !DEMOMODE
+        res.send("Current Mode : " + `${(DEMOMODE ? "Demo" : "Live")}`)
+    }),
+
+    app.listen(5000, () => {
+        if (DEMOMODE) {
+
+            if (fs.existsSync('demotoken.txt')) {
+
+                _Token = { access_token: fs.readFileSync('demotoken.txt', 'utf8') }
+            }
+        }
+        console.log("iSpend-iCry RestAPI listening on port 5000")
+    });
