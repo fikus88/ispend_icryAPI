@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "express": "^4.16.2",
+    "express": "^4.18.2",
     "truelayer-client": "^1.0.9"
   },
   "devDependencies": {},
